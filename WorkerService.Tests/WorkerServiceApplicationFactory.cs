@@ -79,11 +79,11 @@ public class WorkerServiceApplicationFactory : WebApplicationFactory<Program>, I
         createEntityCommandConsumer.OnMessageConsumed += () => messageConsumed = true;
 
         var sender = _serviceBusClient.CreateSender(_createEntityCommandConsumerOptions.QueueName);
-        await sender.SendMessageAsync(new ServiceBusMessage(JsonSerializer.Serialize(command)), TestContext.Current.CancellationToken);
+        await sender.SendMessageAsync(new ServiceBusMessage(JsonSerializer.Serialize(command)), cancellationToken);
 
         while (!messageConsumed)
         {
-            await Task.Delay(1000, TestContext.Current.CancellationToken);
+            await Task.Delay(1000, cancellationToken);
         }
     }
 
