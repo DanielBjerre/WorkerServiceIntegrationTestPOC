@@ -10,7 +10,7 @@ It is difficult to do integration tests as you would for an api, which follows t
 With a worker service that asynchronously consumes a message from an queue, the pattern would be:
 * Send message to queue
 * Wait for worker to consume message
-* Assert state changes
+* Assert state
 
 The problem with this flow is: how does your test know when the message has been consumed?
 
