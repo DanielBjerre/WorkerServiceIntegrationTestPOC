@@ -12,20 +12,18 @@ public class CreateEntityCommandConsumer(
     IOptions<CreateEntityCommandConsumerOptions> options,
     IDbContextFactory<WorkerServiceContext> workerServiceContextFactory) : MessageConsumer<CreateEntityCommand>(logger, serviceBusClient)
 {
-    private readonly ILogger<CreateEntityCommandConsumer> _logger = logger;
     private readonly IOptions<CreateEntityCommandConsumerOptions> options = options;
     private readonly IDbContextFactory<WorkerServiceContext> _workerServiceContextFactory = workerServiceContextFactory;
 
     protected override string QueueName => options.Value.QueueName;
 
-    protected override async Task HandleMessage(CreateEntityCommand createEntityCommand, CancellationToken cancellationToken)
+    protected override async Task HandleMessage(CreateEntityCommand messageBody, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
     {
         using var context = await _workerServiceContextFactory.CreateDbContextAsync(cancellationToken);
-        var entity = new TestEntity(createEntityCommand.Id, createEntityCommand.Name);
+        var entity = new TestEntity(messageBody.Id, messageBody.Name);
         context.TestEntities.Add(entity);
         await context.SaveChangesAsync(cancellationToken);
     }
-
 }
 public record CreateEntityCommand(Guid Id, string Name);
 
