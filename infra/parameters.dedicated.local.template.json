@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourcePrefix": {
+      "value": "workerservice"
+    },
+    "workloadProfileType": {
+      "value": "Dedicated"
+    },
+    "dedicatedWorkloadProfileName": {
+      "value": "D4"
+    },
+    "imageTag": {
+      "value": "latest"
+    },
+    "minReplicas": {
+      "value": 2
+    },
+    "maxReplicas": {
+      "value": 20
+    },
+    "sqlAdminLogin": {
+      "value": "sqladmin"
+    },
+    "sqlAdminPassword": {
+      "value": "REPLACE_WITH_SECURE_PASSWORD_OR_USE_CLI_PARAMETER"
+    }
+  }
+}

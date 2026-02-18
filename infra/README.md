@@ -78,6 +78,11 @@ Cost = (Hours × Profile hourly rate) + (Requests × Request price)
 
 3. Docker image built and tagged (see main README)
 
+4. **Important**: Update parameter files with your Key Vault details:
+   - Edit `infra/parameters.consumption.json` or `infra/parameters.dedicated.json`
+   - Replace placeholders: `{subscription-id}`, `{rg-name}`, `{vault-name}`
+   - Or pass `sqlAdminPassword` directly via command line (see examples below)
+
 ### Deployment Steps
 
 #### 1. Create Resource Group
@@ -92,12 +97,33 @@ az group create \
 
 For development/testing or variable workloads:
 
+**Option A: Using Key Vault (Recommended for Production)**
+```bash
+# Update infra/parameters.consumption.json with your Key Vault details
+az deployment group create \
+  --resource-group rg-workerservice \
+  --template-file infra/main.bicep \
+  --parameters infra/parameters.consumption.json
+```
+
+**Option B: Passing Password Directly (For Testing)**
 ```bash
 az deployment group create \
   --resource-group rg-workerservice \
   --template-file infra/main.bicep \
   --parameters infra/parameters.consumption.json \
   --parameters sqlAdminPassword='<your-secure-password>'
+```
+
+**Option C: Using Local Parameter File (Not Committed)**
+```bash
+# Copy and edit the local template
+cp infra/parameters.consumption.local.template.json infra/parameters.consumption.local.json
+# Edit the file and replace REPLACE_WITH_SECURE_PASSWORD_OR_USE_CLI_PARAMETER
+az deployment group create \
+  --resource-group rg-workerservice \
+  --template-file infra/main.bicep \
+  --parameters infra/parameters.consumption.local.json
 ```
 
 **Key Parameters:**
@@ -219,10 +245,39 @@ az containerapp update \
 
 ## Security Considerations
 
-1. **Secrets Management**: Use Azure Key Vault for storing sensitive configuration (demonstrated in parameter files)
-2. **Network Security**: Consider using VNet integration for production workloads
-3. **Managed Identities**: Update to use Managed Identities instead of connection strings for production
-4. **SQL Firewall**: Restrictfirewall rules to only allow Container Apps
+**Important**: This infrastructure is designed for getting started quickly. For production deployments, consider these security enhancements:
+
+1. **Secrets Management**: 
+   - ✅ Parameter files support Azure Key Vault references
+   - ⚠️ Connection strings are currently passed through deployment outputs for simplicity
+   - 🔒 Production recommendation: Use Managed Identities instead of connection strings
+
+2. **Container Registry**:
+   - ⚠️ Admin user is enabled for ease of use
+   - 🔒 Production recommendation: Use Managed Identity or Service Principal authentication
+
+3. **Authentication**:
+   - ⚠️ Current implementation uses connection strings
+   - 🔒 Production recommendation: 
+     - Service Bus: Use Managed Identity with RBAC (Azure Service Bus Data Owner role)
+     - SQL Database: Use Managed Identity authentication
+     - Container Registry: Use Managed Identity for pulling images
+
+4. **Network Security**: 
+   - ⚠️ Resources are publicly accessible
+   - 🔒 Production recommendation: Use VNet integration for Container Apps and private endpoints
+
+5. **SQL Firewall**: 
+   - ⚠️ Currently allows all Azure services (0.0.0.0)
+   - 🔒 Production recommendation: Restrict firewall rules to only allow Container Apps subnet
+
+### Upgrading to Managed Identities
+
+For production deployments, update the Bicep templates to:
+1. Enable system-assigned managed identity on the Container App
+2. Grant RBAC roles for Service Bus and SQL Database
+3. Remove connection strings from configuration
+4. Update application code to use `DefaultAzureCredential`
 
 ## Cleanup
 

@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Bicep generated ARM templates (can be regenerated from .bicep files)
 infra/main.json
 infra/modules/*.json
+
+# Local parameter files with secrets (use Key Vault references instead)
+infra/*.local.json
